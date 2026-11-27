@@ -1,0 +1,21 @@
+{
+	"name": "LS_SQLServer_SRC",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "Mani37-Laptop\\SQLEXPRESS",
+			"database": "SQL_Migration_ADF",
+			"encrypt": "optional",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "ADF_Practice_Login",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyODc2ODU5OS1kMGNmLTRiMTMtYTQxNC1kZGE1OWNhY2JhYTAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "SelfSQLIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
