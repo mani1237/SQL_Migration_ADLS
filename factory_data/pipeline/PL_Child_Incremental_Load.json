@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "CPY_Full_Inc_Load",
+				"name": "CPY_SQL_Full_Incremental_Load",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -62,9 +62,52 @@
 				"outputs": [
 					{
 						"referenceName": "DS_ADLS_Retail_parque",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							}
+						}
 					}
 				]
+			},
+			{
+				"name": "Exec_Pipeline_Update_WaterMark",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CPY_SQL_Full_Incremental_Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Child_Watermark_StoreProcedure",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"TableSchema": {
+							"value": "@pipeline().parameters.TableSchema",
+							"type": "Expression"
+						},
+						"TableName": {
+							"value": "@pipeline().parameters.TableName",
+							"type": "Expression"
+						},
+						"WatermarkColumn": {
+							"value": "@pipeline().parameters.WatermarkColumn",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
