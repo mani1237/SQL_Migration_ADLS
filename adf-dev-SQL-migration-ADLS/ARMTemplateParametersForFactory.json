@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-dev-SQL-migration-ADLS"
+		},
+		"LS_SQLServer_SRC_password": {
+			"value": ""
+		},
+		"LS_SQL_Retail_Tables_password": {
+			"value": ""
+		},
+		"LS_ADLS_Retail_Parq_accountKey": {
+			"value": ""
+		},
+		"LS_SQLServer_SRC_properties_typeProperties_server": {
+			"value": "Mani37-Laptop\\SQLEXPRESS"
+		},
+		"LS_SQLServer_SRC_properties_typeProperties_database": {
+			"value": "SQL_Migration_ADF"
+		},
+		"LS_SQLServer_SRC_properties_typeProperties_userName": {
+			"value": "ADF_Practice_Login"
+		},
+		"LS_SQL_Retail_Tables_properties_typeProperties_server": {
+			"value": "Mani37-Laptop\\SQLEXPRESS"
+		},
+		"LS_SQL_Retail_Tables_properties_typeProperties_database": {
+			"value": "SQL_MIGRATION_ADF"
+		},
+		"LS_SQL_Retail_Tables_properties_typeProperties_userName": {
+			"value": "ADF_Practice_Login"
+		},
+		"LS_ADLS_Retail_Parq_properties_typeProperties_url": {
+			"value": "https://adlssqlmigrationsink.dfs.core.windows.net/"
+		}
+	}
+}
