@@ -51,43 +51,127 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "Execute_PL_For_SQL_ADLS",
-							"type": "ExecutePipeline",
+							"name": "Lookup_Checking_New_Data",
+							"type": "Lookup",
 							"dependsOn": [],
 							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
 								"secureInput": false
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"pipeline": {
-									"referenceName": "PL_Child_Incremental_Load",
-									"type": "PipelineReference"
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat(\n    'SELECT CASE WHEN EXISTS (SELECT 1 FROM ',\n    item().TableSchema, '.', item().TableName,\n    if(\n        equals(item().LastLoadValue, null),\n        '',\n        concat(\n            ' WHERE ',\n            item().WatermarkColumn,\n            ' > ',\n            item().LastLoadValue\n        )\n    ),\n    ') THEN 1 ELSE 0 END AS HasNewRecords'\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
 								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"TableSchema": {
-										"value": "@item().TableSchema",
-										"type": "Expression"
-									},
-									"TableName": {
-										"value": "@item().TableName",
-										"type": "Expression"
-									},
-									"WatermarkColumn": {
-										"value": "@item().WatermarkColumn",
-										"type": "Expression"
-									},
-									"LastLoadValue": {
-										"value": "@item().LastLoadValue",
-										"type": "Expression"
+								"dataset": {
+									"referenceName": "DS_LKP_Max_Value",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableSchema": {
+											"value": "@item().TableSchema",
+											"type": "Expression"
+										},
+										"TableName": {
+											"value": "@item().TableName",
+											"type": "Expression"
+										}
 									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "IF_Check_For_New_Data",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Lookup_Checking_New_Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('Lookup_Checking_New_Data').output.firstRow.HasNewRecords,1)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Table_Load_Status",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "Table_Status",
+											"value": {
+												"value": "@concat(item().TableName, ' - Skipped due to no new Records')",
+												"type": "Expression"
+											}
+										}
+									}
+								],
+								"ifTrueActivities": [
+									{
+										"name": "Execute_PL_For_SQL_ADLS",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"policy": {
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "PL_Child_Incremental_Load",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"TableSchema": {
+													"value": "@item().TableSchema",
+													"type": "Expression"
+												},
+												"TableName": {
+													"value": "@item().TableName",
+													"type": "Expression"
+												},
+												"WatermarkColumn": {
+													"value": "@item().WatermarkColumn",
+													"type": "Expression"
+												},
+												"LastLoadValue": {
+													"value": "@item().LastLoadValue",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
 							}
 						}
 					]
 				}
 			}
 		],
+		"variables": {
+			"Table_Status": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
